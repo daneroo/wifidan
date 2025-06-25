@@ -10,6 +10,8 @@ The project facilitates WiFi throughput measurement and provides visualization  
 
 The conclusion was that the Bell Giga router was superior in all respects, but we will still migrate the the new UniFi setup, for other reasons (configurability, security, independence from the provider).
 
+Published at: <https://wifidan.netlify.app/>
+
 ![WiFi Performance Analysis Results](UniFi-WiFi-Placement-2025-06-24.png)
 
 ## Project Structure
