@@ -14,6 +14,10 @@ Published at: <https://wifidan.netlify.app/>
 
 ![WiFi Performance Analysis Results](UniFi-WiFi-Placement-2025-06-24.png)
 
+## TODO
+
+- Taks a look at <https://github.com/hnykda/wifi-heatmapper?tab=readme-ov-file>
+
 ## Project Structure
 
 ### 1. Measurement Tools (miperf3)
