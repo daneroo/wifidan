@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WiFi Performance Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        margin: 40px;
+        background: #f8f9fa;
+      }
+      h1 {
+        color: #2d3748;
+        margin-bottom: 20px;
+      }
+      #chart {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WiFi Performance Analysis</h1>
+    <div id="chart"></div>
+
+    <script>
+      // Embedded aggregated data from CSV
+      const data = [
+        {
+          spot: "Office (B)",
+          router: "Bell-Giga",
+          down_min: 648,
+          down_max: 926,
+          up_min: 397,
+          up_max: 634,
+          rssi_avg: -29,
+        },
+        {
+          spot: "TV (B)",
+          router: "Bell-Giga",
+          down_min: 623,
+          down_max: 922,
+          up_min: 364,
+          up_max: 498,
+          rssi_avg: -53,
+        },
+        {
+          spot: "Office (1F)",
+          router: "Bell-Giga",
+          down_min: 322,
+          down_max: 437,
+          up_min: 282,
+          up_max: 298,
+          rssi_avg: -64.5,
+        },
+        {
+          spot: "Living (1F)",
+          router: "Bell-Giga",
+          down_min: 276,
+          down_max: 288,
+          up_min: 153,
+          up_max: 246,
+          rssi_avg: -65.5,
+        },
+        {
+          spot: "Kitchen (1F)",
+          router: "Bell-Giga",
+          down_min: 106,
+          down_max: 267,
+          up_min: 67,
+          up_max: 72,
+          rssi_avg: -72.5,
+        },
+        {
+          spot: "Carport (1F)",
+          router: "Bell-Giga",
+          down_min: 48,
+          down_max: 88,
+          up_min: 22,
+          up_max: 49,
+          rssi_avg: -69.5,
+        },
+        {
+          spot: "Office (B)",
+          router: "U6-LR-Wall",
+          down_min: 326,
+          down_max: 378,
+          up_min: 394,
+          up_max: 395,
+          rssi_avg: -36.5,
+        },
+        {
+          spot: "TV (B)",
+          router: "U6-LR-Wall",
+          down_min: 341,
+          down_max: 363,
+          up_min: 391,
+          up_max: 391,
+          rssi_avg: -54,
+        },
+        {
+          spot: "Office (1F)",
+          router: "U6-LR-Wall",
+          down_min: 139,
+          down_max: 208,
+          up_min: 140,
+          up_max: 268,
+          rssi_avg: -73,
+        },
+        {
+          spot: "Living (1F)",
+          router: "U6-LR-Wall",
+          down_min: 59,
+          down_max: 64,
+          up_min: 69,
+          up_max: 80,
+          rssi_avg: -59,
+        },
+        {
+          spot: "Kitchen (1F)",
+          router: "U6-LR-Wall",
+          down_min: 36,
+          down_max: 153,
+          up_min: 87,
+          up_max: 149,
+          rssi_avg: -68.5,
+        },
+        {
+          spot: "Carport (1F)",
+          router: "U6-LR-Wall",
+          down_min: 37,
+          down_max: 41,
+          up_min: 60,
+          up_max: 61,
+          rssi_avg: -66,
+        },
+      ];
+
+      // Order spots by average download speed (like Python version)
+      const spotOrder = [...new Set(data.map((d) => d.spot))]
+        .map((spot) => ({
+          spot,
+          avg:
+            data
+              .filter((d) => d.spot === spot)
+              .reduce((sum, d) => sum + (d.down_min + d.down_max) / 2, 0) /
+            data.filter((d) => d.spot === spot).length,
+        }))
+        .sort((a, b) => a.avg - b.avg)
+        .map((d) => d.spot);
+
+      // Create x-axis positions (0, 1, 2, ...)
+      const xPositions = {};
+      spotOrder.forEach((spot, i) => (xPositions[spot] = i));
+
+      // Separate data by router
+      const bellData = data.filter((d) => d.router === "Bell-Giga");
+      const unifiData = data.filter((d) => d.router === "U6-LR-Wall");
+
+      // Colors matching Python version
+      const bellColor = "#ff7f0e"; // Orange
+      const unifiColor = "#1f77b4"; // Blue
+
+      // Create traces for Plotly
+      const traces = [];
+
+      // Calculate overall min/max and averages for each router
+      const bellDataWithCalcs = bellData.map((d) => ({
+        ...d,
+        overall_min: Math.min(d.down_min, d.up_min),
+        overall_max: Math.max(d.down_max, d.up_max),
+        down_avg: (d.down_min + d.down_max) / 2,
+        up_avg: (d.up_min + d.up_max) / 2,
+      }));
+
+      const unifiDataWithCalcs = unifiData.map((d) => ({
+        ...d,
+        overall_min: Math.min(d.down_min, d.up_min),
+        overall_max: Math.max(d.down_max, d.up_max),
+        down_avg: (d.down_min + d.down_max) / 2,
+        up_avg: (d.up_min + d.up_max) / 2,
+      }));
+
+      // Overall range for Bell-Giga - MIN first (no fill)
+      traces.push({
+        x: bellDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: bellDataWithCalcs.map((d) => d.overall_min),
+        fill: "none",
+        line: { color: "transparent" },
+        name: "Bell-Giga Range",
+        legendgroup: "bell-range",
+        showlegend: false,
+        hoverinfo: "skip",
+        yaxis: "y",
+      });
+
+      // Overall range for Bell-Giga - MAX (fills to previous trace)
+      traces.push({
+        x: bellDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: bellDataWithCalcs.map((d) => d.overall_max),
+        fill: "tonexty",
+        fillcolor: bellColor + "30", // 20% opacity
+        line: { color: "transparent" },
+        name: "Bell-Giga Range",
+        legendgroup: "bell-range",
+        showlegend: true,
+        hoverinfo: "skip",
+        yaxis: "y",
+      });
+
+      // Overall range for U6-LR-Wall - MIN first (no fill)
+      traces.push({
+        x: unifiDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: unifiDataWithCalcs.map((d) => d.overall_min),
+        fill: "none",
+        line: { color: "transparent" },
+        name: "U6-LR-Wall Range",
+        legendgroup: "unifi-range",
+        showlegend: false,
+        hoverinfo: "skip",
+        yaxis: "y",
+      });
+
+      // Overall range for U6-LR-Wall - MAX (fills to previous trace)
+      traces.push({
+        x: unifiDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: unifiDataWithCalcs.map((d) => d.overall_max),
+        fill: "tonexty",
+        fillcolor: unifiColor + "30", // 20% opacity
+        line: { color: "transparent" },
+        name: "U6-LR-Wall Range",
+        legendgroup: "unifi-range",
+        showlegend: true,
+        hoverinfo: "skip",
+        yaxis: "y",
+      });
+
+      // Average download lines (dashed)
+      traces.push({
+        x: bellDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: bellDataWithCalcs.map((d) => d.down_avg),
+        mode: "lines",
+        line: {
+          color: bellColor,
+          dash: "dash",
+          width: 2,
+        },
+        name: "Bell-Giga Avg Download",
+        legendgroup: "bell-download",
+        yaxis: "y",
+      });
+
+      traces.push({
+        x: unifiDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: unifiDataWithCalcs.map((d) => d.down_avg),
+        mode: "lines",
+        line: {
+          color: unifiColor,
+          dash: "dash",
+          width: 2,
+        },
+        name: "U6-LR-Wall Avg Download",
+        legendgroup: "unifi-download",
+        yaxis: "y",
+      });
+
+      // Average upload lines (different dash style)
+      traces.push({
+        x: bellDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: bellDataWithCalcs.map((d) => d.up_avg),
+        mode: "lines",
+        line: {
+          color: bellColor,
+          dash: "dashdot",
+          width: 2,
+        },
+        name: "Bell-Giga Avg Upload",
+        legendgroup: "bell-upload",
+        yaxis: "y",
+      });
+
+      traces.push({
+        x: unifiDataWithCalcs.map((d) => xPositions[d.spot]),
+        y: unifiDataWithCalcs.map((d) => d.up_avg),
+        mode: "lines",
+        line: {
+          color: unifiColor,
+          dash: "dashdot",
+          width: 2,
+        },
+        name: "U6-LR-Wall Avg Upload",
+        legendgroup: "unifi-upload",
+        yaxis: "y",
+      });
+
+      // RSSI dotted lines for Bell-Giga (on right y-axis)
+      traces.push({
+        x: bellData.map((d) => xPositions[d.spot]),
+        y: bellData.map((d) => d.rssi_avg),
+        mode: "lines",
+        line: {
+          color: bellColor,
+          dash: "dot",
+          width: 2,
+        },
+        name: "Bell-Giga Signal",
+        legendgroup: "bell-signal",
+        yaxis: "y2",
+        showlegend: true,
+        hoverinfo: "skip",
+      });
+
+      // RSSI dotted lines for U6-LR-Wall (on right y-axis)
+      traces.push({
+        x: unifiData.map((d) => xPositions[d.spot]),
+        y: unifiData.map((d) => d.rssi_avg),
+        mode: "lines",
+        line: {
+          color: unifiColor,
+          dash: "dot",
+          width: 2,
+        },
+        name: "U6-LR-Wall Signal",
+        legendgroup: "unifi-signal",
+        yaxis: "y2",
+        showlegend: true,
+        hoverinfo: "skip",
+      });
+
+      // RSSI dots for Bell-Giga (on right y-axis)
+      traces.push({
+        x: bellData.map((d) => xPositions[d.spot]),
+        y: bellData.map((d) => d.rssi_avg),
+        mode: "markers",
+        marker: {
+          color: bellColor,
+          size: 8,
+          line: { color: "white", width: 2 },
+        },
+        name: "Bell-Giga Signal",
+        legendgroup: "bell-signal",
+        showlegend: false,
+        yaxis: "y2",
+        hovertemplate: "%{x}<br>RSSI: %{y} dBm<extra></extra>",
+      });
+
+      // RSSI dots for U6-LR-Wall (on right y-axis)
+      traces.push({
+        x: unifiData.map((d) => xPositions[d.spot]),
+        y: unifiData.map((d) => d.rssi_avg),
+        mode: "markers",
+        marker: {
+          color: unifiColor,
+          size: 8,
+          line: { color: "white", width: 2 },
+        },
+        name: "U6-LR-Wall Signal",
+        legendgroup: "unifi-signal",
+        showlegend: false,
+        yaxis: "y2",
+        hovertemplate: "%{x}<br>RSSI: %{y} dBm<extra></extra>",
+      });
+
+      // Layout with mobile responsiveness
+      const layout = {
+        title: {
+          text: "WiFi Performance by Location and Router",
+          font: { size: window.innerWidth < 768 ? 14 : 16 },
+        },
+        // Remove fixed width for responsiveness
+        height: window.innerWidth < 768 ? 500 : 600,
+        xaxis: {
+          title: "Location",
+          tickmode: "array",
+          tickvals: spotOrder.map((_, i) => i),
+          ticktext: spotOrder,
+          tickangle: window.innerWidth < 768 ? -90 : -45,
+          tickfont: { size: window.innerWidth < 768 ? 10 : 12 },
+        },
+        yaxis: {
+          title: "Throughput (Mbps)",
+          side: "left",
+          range: [0, 1000],
+          titlefont: { size: window.innerWidth < 768 ? 12 : 14 },
+        },
+        yaxis2: {
+          title: "Signal Strength (dBm)",
+          side: "right",
+          overlaying: "y",
+          range: [-80, -20],
+          tickmode: "linear",
+          dtick: 10,
+          titlefont: { size: window.innerWidth < 768 ? 12 : 14 },
+        },
+        legend: {
+          x: window.innerWidth < 768 ? 0 : 0.02,
+          y: window.innerWidth < 768 ? -0.3 : 0.98,
+          bgcolor: "rgba(255,255,255,0.9)",
+          orientation: window.innerWidth < 768 ? "h" : "v",
+          font: { size: window.innerWidth < 768 ? 10 : 12 },
+        },
+        plot_bgcolor: "white",
+        margin: {
+          l: window.innerWidth < 768 ? 60 : 80,
+          r: window.innerWidth < 768 ? 60 : 80,
+          t: window.innerWidth < 768 ? 60 : 80,
+          b: window.innerWidth < 768 ? 180 : 120,
+        },
+      };
+
+      // Create the plot
+      Plotly.newPlot("chart", traces, layout, {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
+      });
+    </script>
+
+    <div
+      style="
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        max-width: 1000px;
+      "
+    >
+      <h2 style="color: #2d3748; margin-top: 0">About This Analysis</h2>
+      <p>
+        This chart compares WiFi performance between two routers across
+        different locations in a residential setting:
+      </p>
+      <ul>
+        <li><strong>Bell Giga</strong> (orange) - ISP-provided router</li>
+        <li>
+          <strong>UniFi U6-LR Wall</strong> (blue) - Dedicated access point
+        </li>
+      </ul>
+      <p>
+        <strong>Key Findings:</strong> The Bell Giga router consistently
+        outperformed the UniFi access point in both throughput and signal
+        strength across all measurement locations.
+      </p>
+      <p>
+        <strong>Interactive Features:</strong> Click legend items to show/hide
+        data series. The chart displays throughput ranges (shaded areas),
+        average speeds (dashed lines), and signal strength (dotted lines with
+        dots).
+      </p>
+      <p style="font-size: 0.9em; color: #666; margin-bottom: 0">
+        Data collected using mobile devices (iPad Air 4, Pixel 6) with iperf3
+        across 6 locations.
+        <a href="https://github.com/daneroo/wifidan" style="color: #007acc"
+          >View source code</a
+        >
+      </p>
+    </div>
+  </body>
+</html>

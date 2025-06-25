@@ -1,0 +1,25 @@
+Spot,Router,Client,Signal dBm,Down ↓Mbps,Up ↑ Mbps
+Carport (1F),Bell-Giga,Ipad Air 4,-63,48,22
+Kitchen (1F),Bell-Giga,Ipad Air 4,-71,267,67
+Living (1F),Bell-Giga,Ipad Air 4,-67,276,153
+Office (1F),Bell-Giga,Ipad Air 4,-64,437,282
+TV (B),Bell-Giga,Ipad Air 4,-48,623,498
+Office (B),Bell-Giga,Ipad Air 4,-29,648,634
+Carport (1F),Bell-Giga,Pixel 6,-76,88,49
+Kitchen (1F),Bell-Giga,Pixel 6,-74,106,72
+Living (1F),Bell-Giga,Pixel 6,-64,288,246
+Office (1F),Bell-Giga,Pixel 6,-65,322,298
+TV (B),Bell-Giga,Pixel 6,-58,922,364
+Office (B),Bell-Giga,Pixel 6,-29,926,397
+Carport (1F),U6-LR-Wall,Ipad Air 4,-64,41,60
+Kitchen (1F),U6-LR-Wall,Ipad Air 4,-75,153,149
+Living (1F),U6-LR-Wall,Ipad Air 4,-58,59,69
+Office (1F),U6-LR-Wall,Ipad Air 4,-75,139,140
+TV (B),U6-LR-Wall,Ipad Air 4,-55,341,391
+Office (B),U6-LR-Wall,Ipad Air 4,-41,326,394
+Carport (1F),U6-LR-Wall,Pixel 6,-68,37,61
+Kitchen (1F),U6-LR-Wall,Pixel 6,-62,36,87
+Living (1F),U6-LR-Wall,Pixel 6,-60,64,80
+Office (1F),U6-LR-Wall,Pixel 6,-71,208,268
+TV (B),U6-LR-Wall,Pixel 6,-53,363,391
+Office (B),U6-LR-Wall,Pixel 6,-32,378,395
