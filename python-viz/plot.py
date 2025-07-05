@@ -34,9 +34,13 @@ The script can also be run directly as ./plot.py after chmod +x plot.py
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from pathlib import Path
 
-# File naming constant
+SCRIPT_DIR = Path(__file__).resolve().parent
+DATA_DIR = (SCRIPT_DIR / "../data").resolve()
 FILENAME_PREFIX = "UniFi-WiFi-Placement-2025-06-24"
+csv_filename = DATA_DIR / f"{FILENAME_PREFIX}.csv"
+png_filename = DATA_DIR / f"{FILENAME_PREFIX}.png"
 
 
 def main():
@@ -48,7 +52,6 @@ def main():
 
 def load_and_clean_data():
     """Load CSV data and clean column names."""
-    csv_filename = f"{FILENAME_PREFIX}.csv"
     df = pd.read_csv(csv_filename)
     print(f"✓ Read data from: {csv_filename}")
     # Clean column names (remove special characters)
@@ -215,7 +218,6 @@ def make_plot(df):
     plt.tight_layout()
 
     # Save as PNG file
-    png_filename = f"{FILENAME_PREFIX}.png"
     plt.savefig(png_filename, dpi=300, bbox_inches="tight")
     print(f"✓ Plot saved as: {png_filename}")
 
