@@ -9,17 +9,49 @@
 
 # Config
 IPERF_TARGET="192.168.2.33"
-IPERF_OPTS="-t 10 -P 4 -O 2"  # 10s test, 4 streams, 2s warmup
+IPERF_OPTS="-P 4 -O 1"  # 4 streams, 1s warmup
 LOCATION="UNSET"
+duration=5
+verbose=false
 
-echo "- Running: 10s test with 4 streams (2s warmup) - both directions"
-echo "- Command: iperf3 -c $IPERF_TARGET $IPERF_OPTS"
+# Functions
+usage() {
+  echo "Usage: $0 [-t <seconds>] [-v] [-h]"
+  echo "  -t: duration in seconds (default: 5)"
+  echo "  -v: verbose output (prints download/upload speeds as they are measured)"
+  echo "  -h: print this help message"
+  exit 0
+}
+
+# Options
+while getopts "t:vh" opt; do
+  case "$opt" in
+    t) duration="$OPTARG";;
+    v) verbose=true;;
+    h) usage;;
+    *) usage;;
+  esac
+done
+
+# Add duration to IPERF_OPTS
+IPERF_OPTS="-t $duration $IPERF_OPTS"
+
+echo "- Running: ${duration}s test with 4 streams (1s warmup) - both directions (-h for help)"
+echo "- Command: iperf3 -c $IPERF_TARGET $IPERF_OPTS  (-R)"
 
 # Download (server → client)
-download=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -R -J | jq '.end.sum_received.bits_per_second / 1e6 | round')
+download_json=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -R -J)
+download=$(echo "$download_json" | jq '.end.sum_received.bits_per_second / 1e6 | round')
+if [ "$verbose" = true ]; then
+  echo "  - Down: ${download} Mbps"
+fi
 
 # Upload (client → server)
-upload=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -J | jq '.end.sum_sent.bits_per_second / 1e6 | round')
+upload_json=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -J)
+upload=$(echo "$upload_json" | jq '.end.sum_sent.bits_per_second / 1e6 | round')
+if [ "$verbose" = true ]; then
+  echo "  - Up: ${upload} Mbps"
+fi
 
 # Output
 echo "Location: $LOCATION | Down: ${download} Mbps | Up: ${upload} Mbps"
