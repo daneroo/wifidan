@@ -28,6 +28,8 @@ usage() {
   echo "  -t: duration in seconds (default: 5)"
   echo "  -v: verbose output (prints download/upload speeds as they are measured)"
   echo "  -h: print this help message"
+  echo "To update, run:"
+  echo "curl -L https://bit.ly/miperf3-inst | sh"
   exit 0
 }
 
