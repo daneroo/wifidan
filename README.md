@@ -20,6 +20,7 @@ Published at: <https://wifidan.netlify.app/>
 
 ## Project Structure
 
+- [wiperf-speedtest/](wiperf-speedtest/README.md) - WebSocket-based throughput tester (browser ↔ server)
 - [miperf3/](miperf3/README.md) - iperf3 installer script for my mobile devices
 - [python-viz/](python-viz/README.md) - Python visualization script
 - [web-viz/](web-viz/README.md) - Web visualization script

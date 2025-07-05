@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>wiperf</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <div class="title-section">
+          <i data-lucide="wifi" class="wifi-icon" aria-hidden="true"></i>
+          <h1 class="app-title">wiperf</h1>
+        </div>
+
+        <div class="theme-switcher">
+          <button
+            class="theme-option"
+            data-theme="light"
+            aria-label="Light theme"
+          >
+            <i data-lucide="sun" aria-hidden="true"></i>
+          </button>
+          <button
+            class="theme-option"
+            data-theme="system"
+            aria-label="System theme"
+          >
+            <i data-lucide="monitor" aria-hidden="true"></i>
+          </button>
+          <button
+            class="theme-option"
+            data-theme="dark"
+            aria-label="Dark theme"
+          >
+            <i data-lucide="moon" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Debug Info -->
+      <div
+        class="card debug-info"
+        style="
+          background: var(--bg-tertiary);
+          border-left: 4px solid var(--warning);
+          font-family: monospace;
+          font-size: var(--font-size-sm);
+          padding: var(--space-sm);
+        "
+      >
+        <div
+          style="
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            align-items: center;
+          "
+        >
+          <span>WebSocket: <span id="ws-state">Disconnected</span></span>
+          <span>Buffer: <span id="buffer-status">N/A</span></span>
+          <span>State: <span id="client-state">Idle</span></span>
+          <div style="display: flex; align-items: center; gap: var(--space-xs)">
+            <span>Log:</span>
+            <select
+              id="log-level"
+              name="loglevel"
+              style="
+                padding: 2px 4px;
+                font-size: var(--font-size-xs);
+                font-family: monospace;
+                background: var(--bg-primary);
+                border: 1px solid var(--border-color);
+                border-radius: var(--border-radius-sm);
+                cursor: pointer;
+                min-width: 60px;
+              "
+            >
+              <option value="error">Error</option>
+              <option value="info" selected>Info</option>
+              <option value="debug">Debug</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Configuration (Consistent, Responsive) -->
+      <div class="card test-config-card">
+        <div class="test-config-row">
+          <div class="test-config-group">
+            <div class="test-config-label">Direction</div>
+            <div class="test-config-options">
+              <input
+                type="radio"
+                id="dir-up"
+                name="direction"
+                value="upload"
+                checked
+              />
+              <label for="dir-up">Up</label>
+              <input
+                type="radio"
+                id="dir-down"
+                name="direction"
+                value="download"
+              />
+              <label for="dir-down">Down</label>
+              <input
+                type="radio"
+                id="dir-both"
+                name="direction"
+                value="bidirectional"
+              />
+              <label for="dir-both">Both</label>
+            </div>
+          </div>
+          <div class="test-config-group">
+            <div class="test-config-label">Duration</div>
+            <div class="test-config-options">
+              <input
+                type="radio"
+                id="dur-3"
+                name="duration"
+                value="3"
+                checked
+              />
+              <label for="dur-3">3s</label>
+              <input type="radio" id="dur-10" name="duration" value="10" />
+              <label for="dur-10">10s</label>
+            </div>
+          </div>
+          <div class="test-config-group">
+            <div class="test-config-label">Payload (MiB)</div>
+            <div class="test-config-options">
+              <input type="radio" id="pay-2" name="payload" value="2" />
+              <label for="pay-2">2</label>
+              <input type="radio" id="pay-4" name="payload" value="4" checked />
+              <label for="pay-4">4</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Speed Display -->
+      <div class="card">
+        <div id="speed-display">
+          <h2>Current Speed</h2>
+          <div id="speed-value">
+            <span id="speed-number">0.0</span>
+            <span id="speed-unit">Mbps</span>
+          </div>
+
+          <!-- Status and Progress Info -->
+          <div id="test-info">
+            <div id="test-status">Ready</div>
+            <div id="test-progress"></div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div id="progress-container">
+            <div id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Controls -->
+      <div class="card">
+        <div id="test-controls">
+          <button id="start-button">Start Test</button>
+        </div>
+      </div>
+
+      <!-- Test History -->
+      <div class="card">
+        <div id="test-history">
+          <h3>Test Results</h3>
+          <div id="history-list">
+            <div class="text-muted text-center">No tests completed yet</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="client.js"></script>
+  </body>
+</html>
