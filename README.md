@@ -16,7 +16,7 @@ Published at: <https://wifidan.netlify.app/>
 
 ## TODO
 
-- Taks a look at <https://github.com/hnykda/wifi-heatmapper?tab=readme-ov-file>
+- Take a look at <https://github.com/hnykda/wifi-heatmapper?tab=readme-ov-file>
 
 ## Project Structure
 
@@ -117,6 +117,9 @@ open plot-html/index.html
 
 - Deployed URL: <https://wifidan.netlify.app/>
 - Netlify Dashboard: <https://app.netlify.com/sites/wifidan/deploys>
+- Redeploy/Publish
+  - Scroll down to the "Need to update your project?" section
+  - Drag and drop your project output folder (e.g., `plot-html/`) here
 
 ## Data Format
 
