@@ -49,16 +49,18 @@ IPERF_OPTS="-t $duration $IPERF_OPTS"
 echo "- Running: ${duration}s test with 4 streams (1s warmup) - both directions (-h for help)"
 echo "- Command: iperf3 -c $IPERF_TARGET $IPERF_OPTS  (-R)"
 
+# Note we use floor instead of round because Synology has jq-1.5 (2015)
+
 # Download (server → client)
 download_json=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -R -J)
-download=$(echo "$download_json" | jq '.end.sum_received.bits_per_second / 1e6 | round')
+download=$(echo "$download_json" | jq '.end.sum_received.bits_per_second / 1e6 | floor')
 if [ "$verbose" = true ]; then
   echo "  - Down: ${download} Mbps"
 fi
 
 # Upload (client → server)
 upload_json=$(iperf3 -c "$IPERF_TARGET" $IPERF_OPTS -J)
-upload=$(echo "$upload_json" | jq '.end.sum_sent.bits_per_second / 1e6 | round')
+upload=$(echo "$upload_json" | jq '.end.sum_sent.bits_per_second / 1e6 | floor')
 if [ "$verbose" = true ]; then
   echo "  - Up: ${upload} Mbps"
 fi
